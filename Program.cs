@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -22,7 +23,7 @@ namespace PingBenchmark
             {
                 // Get adrress
                 address = args[0];
-                if(args.Length >= 2)
+                if (args.Length >= 2)
                 {
                     // Get time
                     time = args[1];
@@ -42,7 +43,11 @@ namespace PingBenchmark
             string cmdOut = Ping(IsValidAddress(address) ? address : DEFAULT_ADDRESS, milis);
             Console.WriteLine(cmdOut);
             var parsed = ParseOutput(cmdOut);
-            Console.WriteLine("Ortalama = {0:0.0000}", GetAveragePing(parsed));
+            int[] numbers = GetNumberArray(parsed);
+            double avg = GetAveragePing(numbers);
+            double sd = GetStandarDeviation(numbers, avg);
+            Console.WriteLine("Ortalama = {0:0.0000}", avg);
+            Console.WriteLine("Standart Sapma = {0:0.0000}", sd);
             Console.ReadKey();
         }
 
@@ -51,20 +56,51 @@ namespace PingBenchmark
             return Regex.IsMatch(adr, ipRex);
         }
 
-        private static double GetAveragePing(string[] rows)
+        private static int[] GetNumberArray(string[] rows)
         {
-            double sum = 0;
-            int count = 0;
+            List<int> numberList = new List<int>();
             foreach (string item in rows)
             {
                 string match = ShowMatch(item, regEx);
                 if (!match.Equals(String.Empty))
                 {
-                    sum += int.Parse(match);
-                    count++;
+                    numberList.Add(int.Parse(match));
                 }
             }
-            return sum / count;
+            return numberList.ToArray();
+        }
+
+        private static double GetAveragePing(int[] numbers)
+        {
+            if(numbers.Length >= 1)
+            {
+                double sum = 0;
+                foreach (int number in numbers)
+                {
+                    sum += number;
+                }
+                return sum / numbers.Length;
+            }
+            return 0;
+        }
+
+        private static double GetStandarDeviation(int[] numbers)
+        {
+            return GetStandarDeviation(numbers, GetAveragePing(numbers));
+        }
+
+        private static double GetStandarDeviation(int[] numbers, double mean)
+        {
+            if(numbers.Length >=  1)
+            {
+                double sumSqr = 0;
+                foreach (int number in numbers)
+                {
+                    sumSqr += Math.Pow(number - mean, 2);
+                }
+                return Math.Sqrt(sumSqr / numbers.Length);
+            }
+            return 0;
         }
 
         private static string Ping(string ip, int millis)
