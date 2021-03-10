@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -18,24 +18,16 @@ namespace PingBenchmark
         {
             string time = "10";
             string address = DEFAULT_ADDRESS;
-            if (args.Length == 2)
-            {
-                // Get time
-                time = args[1];
-                // Console.WriteLine("TIME " + time);
-                // Get adrress
-                address = args[0];
-                //Console.WriteLine("ADR " + address);
-            }
-            if (args.Length == 1)
+            if (args.Length >= 1)
             {
                 // Get adrress
                 address = args[0];
-                // Console.WriteLine("ADR " + address);
+                if(args.Length >= 2)
+                {
+                    // Get time
+                    time = args[1];
+                }
             }
-            // Console.ReadKey();
-
-            //
             int milis = 0;
             try
             {
@@ -46,7 +38,6 @@ namespace PingBenchmark
             {
                 milis = DEFAULT_TIME;
             }
-            //string output = "Reply from 192.168.1.1: bytes=32 time=125ms TTL=64";
             // Command done.
             string cmdOut = Ping(IsValidAddress(address) ? address : DEFAULT_ADDRESS, milis);
             Console.WriteLine(cmdOut);
@@ -59,7 +50,6 @@ namespace PingBenchmark
         {
             return Regex.IsMatch(adr, ipRex);
         }
-
 
         private static double GetAveragePing(string[] rows)
         {
@@ -123,7 +113,7 @@ namespace PingBenchmark
             return String.Empty;
         }
 
-        static string[] ParseOutput(string dumpedProc)
+        private static string[] ParseOutput(string dumpedProc)
         {
             return dumpedProc.Split('\n');
         }
